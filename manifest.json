@@ -1,0 +1,10 @@
+{
+  "id": "org.awardwinner.stremio",
+  "version": "1.0.0",
+  "name": "🏆 Award Winner Indicator",
+  "description": "Shows Oscar, Cannes, BAFTA and other major awards",
+  "resources": ["stream"],
+  "types": ["movie", "series"],
+  "idPrefixes": ["tt"],
+  "catalogs": []
+}
