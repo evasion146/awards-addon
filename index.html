@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Award Winner Addon</title>
+    <meta charset="UTF-8">
+    <script>
+        // Database of award-winning movies (IMDB IDs)
+        const awardsDB = {
+            // 2023-2024 Awards
+            'tt9362722': { // Everything Everywhere All at Once
+                awards: ['🏆 Oscar Best Picture 2023', '🏆 7 Oscars Total', '🎭 SAG Best Cast'],
+                year: 2023
+            },
+            'tt15398776': { // Oppenheimer
+                awards: ['🏆 Oscar Best Picture 2024', '🏆 7 Oscars Total', '🎬 BAFTA Best Film'],
+                year: 2024
+            },
+            'tt1517268': { // Barbie
+                awards: ['🏆 Oscar Best Song 2024', '🎨 Critics Choice Best Comedy', '📦 Box Office #1 2023'],
+                year: 2024
+            },
+            
+            // Recent Years
+            'tt10872600': { // Spider-Man: No Way Home
+                awards: ['🎭 Critics Choice Super Hero Film', '📦 Box Office #1 2021', '🍿 Fan Favorite'],
+                year: 2022
+            },
+            'tt9419884': { // The Power of the Dog
+                awards: ['🏆 Oscar Best Director 2022', '🦁 Venice Golden Lion', '🎬 BAFTA Best Film'],
+                year: 2022
+            },
+            'tt10293406': { // CODA
+                awards: ['🏆 Oscar Best Picture 2022', '🏆 First Streaming Winner', '🎭 SAG Best Cast'],
+                year: 2022
+            },
+            'tt10633456': { // Minari
+                awards: ['🏆 Oscar Best Supporting Actress', '🌐 Golden Globe Foreign Film', '🎭 SAG Winner'],
+                year: 2021
+            },
+            'tt10272386': { // The Father
+                awards: ['🏆 Oscar Best Actor (Hopkins)', '🏆 Oscar Best Screenplay', '🎬 BAFTA Winner'],
+                year: 2021
+            },
+            'tt6751668': { // Parasite
+                awards: ['🏆 Oscar Best Picture 2020', '🏆 First Non-English Winner', '🥇 Cannes Palme d\'Or'],
+                year: 2020
+            },
+            'tt8579674': { // 1917
+                awards: ['🏆 Oscar Best Cinematography', '🎬 BAFTA Best Film', '🌐 Golden Globe Drama'],
+                year: 2020
+            },
+            
+            // Classics
+            'tt0111161': { // Shawshank Redemption
+                awards: ['📊 IMDB #1 All Time', '⭐ 7 Oscar Nominations', '🎭 Cult Classic'],
+                year: 1995
+            },
+            'tt0068646': { // The Godfather
+                awards: ['🏆 Oscar Best Picture 1973', '🏆 3 Oscars Total', '📊 IMDB Top 5'],
+                year: 1973
+            },
+            'tt0468569': { // The Dark Knight
+                awards: ['🏆 Oscar Best Supporting Actor', '💔 Heath Ledger Posthumous', '📊 IMDB Top 5'],
+                year: 2009
+            },
+            
+            // More Recent Winners
+            'tt7286456': { // Joker
+                awards: ['🏆 Oscar Best Actor (Phoenix)', '🦁 Venice Golden Lion', '📦 $1 Billion Box Office'],
+                year: 2020
+            },
+            'tt8503618': { // Hamilton
+                awards: ['🎭 11 Tony Awards', '🏆 Pulitzer Prize', '📺 Emmy Winner'],
+                year: 2020
+            },
+            'tt5580390': { // The Shape of Water
+                awards: ['🏆 Oscar Best Picture 2018', '🏆 4 Oscars Total', '🦁 Venice Golden Lion'],
+                year: 2018
+            },
+            'tt4975722': { // Moonlight
+                awards: ['🏆 Oscar Best Picture 2017', '🏆 First LGBTQ Winner', '🌐 Golden Globe Drama'],
+                year: 2017
+            },
+            'tt5013056': { // Dunkirk
+                awards: ['🏆 Oscar Best Editing/Sound', '🎬 BAFTA Best Film', '🎵 Best Sound Design'],
+                year: 2018
+            },
+            
+            // Cannes Winners
+            'tt5715874': { // Titane
+                awards: ['🥇 Cannes Palme d\'Or 2021', '🎭 Most Controversial Winner', '🔥 Cult Following'],
+                year: 2021
+            },
+            'tt8633462': { // Marriage Story
+                awards: ['🏆 Oscar Best Supporting Actress', '🎭 SAG Best Actor', '🌐 6 Oscar Nominations'],
+                year: 2020
+            }
+        };
+
+        // Helper to get award info
+        function getAwardInfo(imdbId) {
+            const movie = awardsDB[imdbId];
+            if (!movie) {
+                return {
+                    awards: ['⭐ Check awards pages for info'],
+                    hasAwards: false
+                };
+            }
+            return {
+                awards: movie.awards,
+                hasAwards: true,
+                year: movie.year
+            };
+        }
+
+        // Manifest
+        const manifest = {
+            id: 'org.awardwinner.stremio',
+            version: '1.0.0',
+            name: '🏆 Award Winner Indicator',
+            description: 'Shows Oscar, Cannes, BAFTA and other major awards',
+            resources: ['stream'],
+            types: ['movie', 'series'],
+            idPrefixes: ['tt'],
+            catalogs: []
+        };
+
+        // Handle requests
+        const path = window.location.pathname.replace(/^\/[^\/]+/, '');
+        
+        if (path.includes('manifest.json')) {
+            document.open();
+            document.write(JSON.stringify(manifest));
+            document.close();
+            
+        } else if (path.includes('/stream/')) {
+            const parts = path.split('/');
+            const type = parts[2];
+            const id = parts[3].replace('.json', '').split(':')[0];
+            
+            const awardInfo = getAwardInfo(id);
+            const streams = [];
+            
+            // Add award information as "streams"
+            awardInfo.awards.forEach(award => {
+                streams.push({
+                    name: "🏆 Awards",
+                    title: award,
+                    externalUrl: `https://www.imdb.com/title/${id}/awards/`
+                });
+            });
+            
+            // Add quick links to award sites
+            if (awardInfo.hasAwards) {
+                streams.push({
+                    name: "🎬 More Info",
+                    title: "View all awards on IMDB",
+                    externalUrl: `https://www.imdb.com/title/${id}/awards/`
+                });
+            } else {
+                streams.push({
+                    name: "🔍 Search",
+                    title: "Check IMDB for awards",
+                    externalUrl: `https://www.imdb.com/title/${id}/awards/`
+                });
+                streams.push({
+                    name: "🔍 Search",
+                    title: "Check if it won Oscars",
+                    externalUrl: `https://www.google.com/search?q=${id}+oscars+academy+awards`
+                });
+            }
+            
+            document.open();
+            document.write(JSON.stringify({ streams }));
+            document.close();
+            
+        } else {
+            // Homepage
+            document.write(`
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        max-width: 800px;
+                        margin: 0 auto;
+                        padding: 20px;
+                        background: #1a1a1a;
+                        color: #fff;
+                    }
+                    .award-list {
+                        background: #2a2a2a;
+                        padding: 15px;
+                        margin: 10px 0;
+                        border-radius: 8px;
+                    }
+                    h3 { color: #f39c12; }
+                    code {
+                        background: #333;
+                        padding: 2px 6px;
+                        border-radius: 3px;
+                    }
+                </style>
+                <h1>🏆 Award Winner Addon</h1>
+                <p>Shows major film awards directly in Stremio!</p>
+                
+                <h2>Currently Tracking:</h2>
+                <div class="award-list">
+                    <h3>2024 Oscar Winners</h3>
+                    <p>Oppenheimer, Barbie (Best Song), and more!</p>
+                </div>
+                
+                <div class="award-list">
+                    <h3>2023 Oscar Winners</h3>
+                    <p>Everything Everywhere All at Once, The Whale, and more!</p>
+                </div>
+                
+                <div class="award-list">
+                    <h3>Recent Cannes Winners</h3>
+                    <p>Parasite, Titane, and other Palme d'Or winners</p>
+                </div>
+                
+                <div class="award-list">
+                    <h3>Box Office Champions</h3>
+                    <p>Movies that won both awards AND audiences</p>
+                </div>
+                
+                <p><strong>Install URL:</strong> <code>${window.location.origin}${window.location.pathname.replace(/\/[^\/]*$/, '')}/manifest.json</code></p>
+            `);
+        }
+    </script>
+</head>
+<body>
+</body>
+</html>
